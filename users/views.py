@@ -13,6 +13,8 @@ class UserListView(LoginRequiredMixin,View):
         return render(request,'user_list.html',{'userlist':userlist})
 
 
+
+
 class UserStatusView(View):
     def get(self,request):
         # print(request.GET)
