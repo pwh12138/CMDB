@@ -6,6 +6,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse
 # Create your views here.
 
+
+
 class BaseView(View):
     def get(self,request):
         return  render(request,'base.html')
