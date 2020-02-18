@@ -23,6 +23,7 @@ urlpatterns = [
     url(r'^dashboard/', include('dashboard.urls')),
     url(r'^login/', LoginView.as_view(),name='login'),
     url(r'^logout/', LogOutView.as_view(),name='logout'),
+    url(r'^users/', include('users.urls')),
 
 
 ]

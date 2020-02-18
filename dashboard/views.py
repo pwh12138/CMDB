@@ -8,7 +8,7 @@ from django.urls import reverse
 
 
 
-class BaseView(View):
+class BaseView(LoginRequiredMixin,View):
     def get(self,request):
         return  render(request,'base.html')
 
