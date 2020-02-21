@@ -6,7 +6,7 @@
             <h2>用户展示</h2>
             <ol class="breadcrumb">
                 <li>
-                    <a hreaf="{% url 'index' %}">首页</a>
+                    <a href="{% url 'index' %}">首页</a>
                 </li>
                 <li>
                     <a href="">用户管理</a>
@@ -26,7 +26,7 @@
                 <h5>用户展示 </h5>
             </div>
             <div class="ibox-content">
-
+                <a class="btn btn-info" href="{% url 'user_add' %}">添加用户</a>
                 <table class="table table-striped">
                     <thead>
                     <tr>
@@ -42,7 +42,7 @@
                     </thead>
                     <tbody>
 
-                     {% for i in userlist %}
+                     {% for i in object_list %}
                         <tr>
                             <td class="text-center">{{ i.id }}</td>
                             <td class="text-center">{{ i.username }}</td>
@@ -65,12 +65,44 @@
                             {% else %}
                                 <button type="button" class="btn btn-primary btn-sm mystatus">启用</button>
                             {% endif %}
-                            <button type="button" class="btn btn-danger btn-sm">删除</button>
+                            <a type="button" class="btn btn-info btn-sm" href="{% url 'user_update' %}?id={{ i.id }}">更新</a>
+                            <button type="button" class="btn btn-danger btn-sm mydelete" >
+                                    删除
+                                </button>
                         </td>
                     </tr>
                     {% endfor %}
                     </tbody>
                 </table>
+            <center>
+                    <div class="btn-group">
+                        {% if page_obj.has_previous %}
+                            <a type="button" class="btn btn-white"
+                               href="{% url 'user_list' %}?page=1"><i
+                                    class="fa">首页</i></a>
+                            <a type="button" class="btn btn-white"
+                               href="{% url 'user_list' %}?page={{ page_obj.previous_page_number }}"><i
+                                    class="fa fa-chevron-left"></i></a>
+                        {% endif %}
+                        {% for page in page_range %}
+                            {% if page == page_obj.number %}
+                                <a class="btn btn-white active"
+                                   href="{% url 'user_list' %}?page={{ page }}">{{ page }}</a>
+                            {% else %}
+                                <a class="btn btn-white" href="{% url 'user_list' %}?page={{ page }}">{{ page }}</a>
+                            {% endif %}
+                        {% endfor %}
+                        {% if page_obj.has_next %}
+
+                            <a type="button" class="btn btn-white"
+                               href="{% url 'user_list' %}?page={{ page_obj.next_page_number }}"><i
+                                    class="fa fa-chevron-right"></i></a>
+                            <a type="button" class="btn btn-white"
+                               href="{% url 'user_list' %}?page={{ page_obj.paginator.num_pages }}"><i
+                                    class="fa">尾页</i></a>
+                        {% endif %}
+                    </div>
+                </center>
             </div>
         </div>
     </div>
@@ -82,10 +114,24 @@
 
 {% block script %}
     <script>
+{#    定义启用和禁用按钮#}
         $('.mystatus').click(function () {
-            {#alert(1)#}
+            username = $(this).parents().parents().children('td').eq(1).html()
+            name_cn = $(this).parents().parents().children('td').eq(4).html()
             id = $(this).parent().parent().children('td').eq(0).html()
+            status = $(this).html().trim()
             {#console.log(id)#}
+            swal({
+                    title: "真的"+status+"吗?",
+                    text: "用户" + username + '(' + name_cn + ')',
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "确定",
+                    cancelButtonText: "取消",
+                    closeOnConfirm: false
+                },
+                function () {
             $.ajax({
                 type: "get",
                 url: "{% url 'userstatus' %}",
@@ -93,19 +139,73 @@
                 dataType: "json",
                 success: function (response) {
                     if (response.status == 0){
-                        layer.msg('更新成功',{
-                            icon: 1
+                        swal({
+                            title: response.msg,
+                            type: 'success',
+                            confirmButtonText: '知道了'
+                        },function () {
+                            window.location.reload()
                         })
-                        window.location.reload()
-                    }else {
-                        layer.msg('更新失败',{
-                            icon: 2
-                        })
-                    }
 
-                 }
-             });
+                    }else {
+                        swal({
+                            title: response.msg,
+                            type: 'error',
+                            confirmButtonText: '知道了'
+                        })
+
+                            }
+                        }
+                    })
+                })
         })
+
+
+    {#定义删除按钮#}
+         $('.mydelete').click(function () {
+            username = $(this).parents().parents().children('td').eq(1).html()
+            name_cn = $(this).parents().parents().children('td').eq(4).html()
+             id = $(this).parent().parent().children('td').eq(0).html()
+            swal({
+                    title: "用户" + username+'('+name_cn+')',
+                    text: "真的确定删除吗?",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "确定",
+                    cancelButtonText: "取消",
+                    closeOnConfirm: false
+                },
+                function () {
+                    $.ajax({
+                        url: "{% url 'userdelete' %}",
+                        type: 'get',
+                        data: {'id': id},
+                        dataType: 'json',
+                        success: function (res) {
+                            if (res.status == 0) {
+                                swal({
+                                    title: res.msg,
+                                    type: 'success',
+                                    confirmButtonText: "知道了"
+                                }, function () {
+                                    location.reload()
+                                });
+                            } else {
+                                swal({
+                                    title: res.msg,
+                                    type: 'error',
+                                    confirmButtonText: "知道了"
+
+                         });
+                            }
+                        }
+                    })
+                })
+        })
+
+
+
     </script>
 
 {% endblock %}
